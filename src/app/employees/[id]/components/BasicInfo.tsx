@@ -3,6 +3,7 @@ import { Employee } from "@/types/employee";
 import { UserTabsRef } from "./UserTabs";
 import { useDepartments } from "@/services/departmentService";
 import { useGroups } from "@/services/groupService";
+import { group } from "console";
 
 interface BasicInfoProps {
   employee: Employee | null;
@@ -32,6 +33,7 @@ export default function BasicInfo({
       email: employee?.email || "",
       password: employee?.password || "",
       roleId: 8,
+      groupId: employee?.groupId || 0,
       Role: {
         id: 8,
         name: employee?.Role?.name || "",

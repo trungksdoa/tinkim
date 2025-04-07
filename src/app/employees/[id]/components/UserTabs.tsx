@@ -7,7 +7,8 @@ import {
   forwardRef,
   useEffect,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useBanks } from "@/services/bankService";
+import { useRoles } from "@/services/roleService";
 import { Employee } from "@/types/employee";
 interface UserTabsProps {
   employee: Employee;
@@ -23,6 +24,11 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
   ({ employee, isEditable, onSave }, ref) => {
     const [activeTab, setActiveTab] = useState("personal");
     const [formData, setFormData] = useState<Partial<Employee>>({});
+
+    const { data: banks } = useBanks();
+    const {data : roles} = useRoles();
+
+
     useImperativeHandle(ref, () => ({
       getFormData: () => formData,
     }));
@@ -39,50 +45,6 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
       ],
       []
     );
-
-    // Add the financial tab content
-    {
-      activeTab === "financial" && (
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Lương cơ bản
-            </label>
-            <input
-              type="number"
-              value={formData?.FinancialInformation?.basicSalary || ""}
-              onChange={(e) =>
-                handleChange(
-                  "FinancialInformation",
-                  "basicSalary",
-                  e.target.value
-                )
-              }
-              disabled={!isEditable}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phụ cấp
-            </label>
-            <input
-              type="number"
-              value={formData?.FinancialInformation?.allowance || ""}
-              onChange={(e) =>
-                handleChange(
-                  "FinancialInformation",
-                  "allowance",
-                  e.target.value
-                )
-              }
-              disabled={!isEditable}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
-            />
-          </div>
-        </div>
-      );
-    }
 
     useEffect(() => {
       if (employee) {
@@ -139,14 +101,7 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
       { value: "suspended", label: "Tạm nghỉ" },
     ];
 
-    const bankOptions = [
-      { value: "vcb", label: "Vietcombank" },
-      { value: "tcb", label: "Techcombank" },
-      { value: "acb", label: "ACB" },
-      { value: "bidv", label: "BIDV" },
-      { value: "other", label: "Khác" },
-    ];
-
+ 
     return (
       <div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
         <div className="border-b border-gray-200">
@@ -173,12 +128,38 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Chức vụ
+                </label>
+                <select
+                  value={formData?.Role?.name || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "roleId",
+                      "roleId",
+                      e.target.value
+                    )
+                  }
+                  disabled={!isEditable}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                >
+                  <option value="">Chọn chức vụ</option>
+                  {roles?.data.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Giới tính
                 </label>
                 <select
                   value={formData.gender || ""}
                   name="gender"
-                  onChange={(e) => handleChange("gender", "gender", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("gender", "gender", e.target.value)
+                  }
                   disabled={!isEditable}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                 >
@@ -202,7 +183,7 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                     handleChange("birthDate", "birthDate", e.target.value)
                   }
                   disabled={!isEditable}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                 />
               </div>
               <div>
@@ -217,7 +198,7 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                     handleChange("education", "education", e.target.value)
                   }
                   disabled={!isEditable}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                 />
               </div>
               <div>
@@ -267,6 +248,47 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                     handleChange(
                       "PrivateInformation",
                       "taxNumber",
+                      e.target.value
+                    )
+                  }
+                  disabled={!isEditable}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "financial" && (
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Lương cơ bản
+                </label>
+                <input
+                  type="number"
+                  value={formData?.FinancialInformation?.basicSalary || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "FinancialInformation",
+                      "basicSalary",
+                      e.target.value
+                    )
+                  }
+                  disabled={!isEditable}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phụ cấp
+                </label>
+                <input
+                  type="number"
+                  value={formData?.FinancialInformation?.allowance || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "FinancialInformation",
+                      "allowance",
                       e.target.value
                     )
                   }
@@ -425,6 +447,61 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngày nộp đơn
+                </label>
+                <input
+                  type="date"
+                  value={formData?.EmploymentInformation?.applicationDate?.toString() || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "EmploymentInformation",
+                      "applicationDate",
+                      e.target.value
+                    )
+                  }
+                  disabled={!isEditable}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngày ký quyết định
+                </label>
+                <input
+                  type="date"
+                  value={formData?.EmploymentInformation?.decisionSignDate?.toString() || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "EmploymentInformation",
+                      "decisionSignDate",
+                      e.target.value
+                    )
+                  }
+                  disabled={!isEditable}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Số quyết định
+                </label>
+                <input
+                  type="text"
+                  value={formData?.EmploymentInformation?.decisionNumber || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "EmploymentInformation",
+                      "decisionNumber",
+                      e.target.value
+                    )
+                  }
+                  disabled={!isEditable}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Người giới thiệu
                 </label>
                 <input
@@ -497,10 +574,12 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                 </label>
                 <input
                   type="text"
-                  value={formData?.PrivateInformation?.bankAccountNumber || ""}
+                  value={
+                    formData?.FinancialInformation?.bankAccountNumber || ""
+                  }
                   onChange={(e) =>
                     handleChange(
-                      "PrivateInformation",
+                      "FinancialInformation",
                       "bankAccountNumber",
                       e.target.value
                     )
@@ -514,10 +593,10 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                   Tên ngân hàng
                 </label>
                 <select
-                  value={formData.PrivateInformation?.bankName || ""}
+                  value={formData.FinancialInformation?.bankName || ""}
                   onChange={(e) =>
                     handleChange(
-                      "PrivateInformation",
+                      "FinancialInformation",
                       "bankName",
                       e.target.value
                     )
@@ -526,9 +605,9 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                 >
                   <option value="">Chọn ngân hàng</option>
-                  {bankOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  {banks?.data.map((bank:any) => (
+                    <option key={bank.id} value={bank?.shortName}>
+                      {bank?.shortName}
                     </option>
                   ))}
                 </select>
@@ -539,7 +618,7 @@ const UserTabs = forwardRef<UserTabsRef, UserTabsProps>(
                 </label>
                 <input
                   type="text"
-                  value={formData?.PrivateInformation?.bankBranch || ""}
+                  value={formData?.FinancialInformation?.bankBranch || ""}
                   onChange={(e) =>
                     handleChange(
                       "PrivateInformation",
